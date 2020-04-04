@@ -1,9 +1,10 @@
 package grpc_server
 
 import (
-	pbTimeShit "go-time-shift-api/proto/timeshift_service_server"
 	"golang.org/x/net/context"
 	"log"
+
+	pbTimeShit "go-time-shift-api/proto/timeshift_service_server"
 )
 
 type TimeShiftServer struct {
