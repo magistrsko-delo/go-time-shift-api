@@ -18,10 +18,11 @@ type TimeShiftServer struct {
 }
 
 func (server *TimeShiftServer) GetMediaChunkInformation(ctx context.Context, in *pbTimeShit.TimeShiftRequest) (*pbTimeShit.TimeShitResponse, error) {
-
+	fmt.Println("get media chunk information")
 	mediaMetadata, err := server.MediaMetadataClientGrpc.GetMediaMetadata(in.GetMediaId())
 
 	if err != nil {
+		fmt.Println("ERROR MEDIA METADATA: ", err)
 		return nil, err
 	}
 
@@ -48,7 +49,7 @@ func (server *TimeShiftServer) getChunkResolutionResponse(mediaId int32) [] *pbT
 	response, err := server.MediaChunksClientGrpc.GetAvailableResolutions()
 
 	if err != nil {
-		fmt.Println( "ERR: ", err)
+		fmt.Println( "ERR chunk resolution: ", err)
 		return [] *pbTimeShit.ChunkResolutionResponse{}
 	}
 
@@ -68,6 +69,7 @@ func (server *TimeShiftServer) getChunkResponse(mediaId int32, resolution string
 	response, err := server.MediaChunksClientGrpc.GetMediaChunksInfoResolution(mediaId, resolution)
 
 	if err != nil {
+		fmt.Println( "ERR chunk: ", err)
 		return [] *pbTimeShit.ChunkResponse{}
 	}
 

@@ -21,7 +21,7 @@ func init()  {
 
 
 func main()  {
-	lis, err := net.Listen("tcp", Models.GetEnvStruct().Url + ":" + Models.GetEnvStruct().Port)
+	lis, err := net.Listen("tcp", ":" + Models.GetEnvStruct().Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -34,7 +34,7 @@ func main()  {
 		MediaMetadataClientGrpc:      	grpc_client.InitMediaMetadataGrpcClient(),
 		Env:							Models.GetEnvStruct(),
 	})
-	log.Println("gRPC server running on: " + Models.GetEnvStruct().Url + ":" + Models.GetEnvStruct().Port)
+	log.Println("gRPC server running on: " + ":" + Models.GetEnvStruct().Port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
