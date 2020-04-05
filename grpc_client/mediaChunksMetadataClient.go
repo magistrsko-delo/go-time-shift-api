@@ -3,6 +3,7 @@ package grpc_client
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes/empty"
 	"go-time-shift-api/Models"
 	"google.golang.org/grpc"
 	"log"
@@ -20,6 +21,20 @@ func (mediaChunksClient *MediaChunksClient) GetMediaChunksInfoResolution(mediaId
 		Resolution:           resolution,
 		MediaId:              mediaId,
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+func (mediaChunksClient *MediaChunksClient) GetAvailableResolutions() (*pbMediaChunks.ResolutionResponse, error) {
+	response, err := mediaChunksClient.client.GetAvailableResolutions(context.Background(),  &empty.Empty{
+		XXX_NoUnkeyedLiteral: struct{}{},
+		XXX_unrecognized:     nil,
+		XXX_sizecache:        0,
+	});
 
 	if err != nil {
 		return nil, err

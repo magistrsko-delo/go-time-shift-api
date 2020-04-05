@@ -21,33 +21,20 @@ func init()  {
 
 
 func main()  {
-
-	// TODO pack into the request
-	mediaMetadataClient := grpc_client.InitMediaMetadataGrpcClient()
-	rsp, err := mediaMetadataClient.GetMediaMetadata(3)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(rsp)
-
-	mediaChunksClient := grpc_client.InitChunkMetadataClient()
-	res, err := mediaChunksClient.GetMediaChunksInfoResolution(2, "1920x1080")
-
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(res.GetData())
-
-
-	lis, err := net.Listen("tcp", ":9004")
+	lis, err := net.Listen("tcp", Models.GetEnvStruct().Url + ":" + Models.GetEnvStruct().Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
 
-	pb.RegisterTimeshiftServer(s, &grpc_server.TimeShiftServer{})
-	log.Println("gRPC server running on port: " + "9004")
+	pb.RegisterTimeshiftServer(s, &grpc_server.TimeShiftServer{
+		UnimplementedTimeshiftServer: 	pb.UnimplementedTimeshiftServer{},
+		MediaChunksClientGrpc:        	grpc_client.InitChunkMetadataClient(),
+		MediaMetadataClientGrpc:      	grpc_client.InitMediaMetadataGrpcClient(),
+		Env:							Models.GetEnvStruct(),
+	})
+	log.Println("gRPC server running on: " + Models.GetEnvStruct().Url + ":" + Models.GetEnvStruct().Port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

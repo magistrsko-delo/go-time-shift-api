@@ -8,6 +8,10 @@ import (
 var envStruct *Env
 
 type Env struct {
+	Port string
+	Url string
+	MediaManagerUrl string
+	ChunkDownloaderUrl string
 	MediaMetadataGrpcServer string
 	MediaMetadataGrpcPort string
 	ChunkMetadataGrpcServer string
@@ -23,6 +27,10 @@ func InitEnv()  {
 		MediaMetadataGrpcPort:   	os.Getenv("MEDIA_METADATA_GRPC_PORT"),
 		ChunkMetadataGrpcServer:  	os.Getenv("CHUNK_METADATA_GRPC_SERVER"),
 		ChunkMetadataGrpcPort:		os.Getenv("CHUNK_METADATA_GRPC_PORT"),
+		MediaManagerUrl: 			os.Getenv("MEDIA_MANAGER_URL"),
+		ChunkDownloaderUrl:			os.Getenv("CHUNK_DOWNLOADER_URL"),
+		Url:						os.Getenv("URL"),
+		Port:						os.Getenv("PORT"),
 	}
 	fmt.Println(envStruct)
 }
