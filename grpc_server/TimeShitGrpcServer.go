@@ -14,11 +14,29 @@ type TimeShiftServer struct {
 
 	MediaChunksClientGrpc *grpc_client.MediaChunksClient
 	MediaMetadataClientGrpc *grpc_client.MediaMetadataClient
+	SequenceServiceClientGrpc *grpc_client.SequenceServiceClient
 	Env *Models.Env
 }
 
+func (server *TimeShiftServer) GetSequenceChunkInformation(ctx context.Context, in *pbTimeShit.TimeShiftSequenceRequest) (*pbTimeShit.TimeShiftSequenceResponse, error)  {
+	sequenceMediaDataResponse, err := server.SequenceServiceClientGrpc.GetSequenceMedia(in.GetSequenceId())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pbTimeShit.TimeShiftSequenceResponse{
+		SequenceId:           	sequenceMediaDataResponse.GetSequence().GetSequenceId(),
+		Name:       			sequenceMediaDataResponse.GetSequence().GetName(),
+		ProjectId:  			sequenceMediaDataResponse.GetSequence().GetProjectId(),
+		Status:     			sequenceMediaDataResponse.GetSequence().GetStatus(),
+		CreatedAt:  			sequenceMediaDataResponse.GetSequence().GetCreatedAt(),
+		UpdatedAt:  			sequenceMediaDataResponse.GetSequence().GetUpdatedAt(),
+		Data:                 	server.getSequenceChunksResolutionResponse(sequenceMediaDataResponse.GetMediaIds()),
+	}, nil
+}
+
 func (server *TimeShiftServer) GetMediaChunkInformation(ctx context.Context, in *pbTimeShit.TimeShiftRequest) (*pbTimeShit.TimeShitResponse, error) {
-	fmt.Println("get media chunk information")
 	mediaMetadata, err := server.MediaMetadataClientGrpc.GetMediaMetadata(in.GetMediaId())
 
 	if err != nil {
@@ -42,6 +60,35 @@ func (server *TimeShiftServer) GetMediaChunkInformation(ctx context.Context, in 
 		MediaUrl:                 server.Env.MediaManagerUrl + "v1/mediaManager/" + mediaMetadata.GetAwsBucketWholeMedia() + "/" + mediaMetadata.GetAwsStorageNameWholeMedia(),
 		Data:                     server.getChunkResolutionResponse(in.GetMediaId()),
 	}, nil
+}
+
+func (server *TimeShiftServer)  getSequenceChunksResolutionResponse (mediaIds []int32)  [] *pbTimeShit.ChunkResolutionResponse {
+	responseResolutions, err := server.MediaChunksClientGrpc.GetAvailableResolutions()
+
+	if err != nil {
+		fmt.Println( "ERR sequence resolution: ", err)
+		return [] *pbTimeShit.ChunkResolutionResponse{}
+	}
+
+	chunksResolutionRsp := [] *pbTimeShit.ChunkResolutionResponse{}
+	for r := 0; r < len(responseResolutions.GetResolutions()); r++ {
+
+		allSequenceChunks := [] *pbTimeShit.ChunkResponse{}
+		for i := 0; i < len(mediaIds); i++ {
+			chunks := server.getChunkResponse(mediaIds[i], responseResolutions.GetResolutions()[r])
+			for j := 0; j < len(chunks); j++ {
+				allSequenceChunks = append(allSequenceChunks,  chunks[j])
+			}
+		}
+
+		chunksResolutionRsp = append(chunksResolutionRsp, &pbTimeShit.ChunkResolutionResponse{
+			Resolution:           responseResolutions.GetResolutions()[r],
+			Chunks:               allSequenceChunks,
+		})
+	}
+
+
+	return chunksResolutionRsp
 }
 
 func (server *TimeShiftServer) getChunkResolutionResponse(mediaId int32) [] *pbTimeShit.ChunkResolutionResponse {

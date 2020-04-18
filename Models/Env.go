@@ -16,7 +16,8 @@ type Env struct {
 	MediaMetadataGrpcPort string
 	ChunkMetadataGrpcServer string
 	ChunkMetadataGrpcPort string
-
+	SequenceServiceServer string
+	SequenceServicePort string
 	Env string
 }
 
@@ -31,6 +32,8 @@ func InitEnv()  {
 		ChunkDownloaderUrl:			os.Getenv("CHUNK_DOWNLOADER_URL"),
 		Url:						os.Getenv("URL"),
 		Port:						os.Getenv("PORT"),
+		SequenceServiceServer:		os.Getenv("SEQUENCE_SERVICE_GRPC_SERVER"),
+		SequenceServicePort:		os.Getenv("SEQUENCE_SERVICE_GRPC_PORT"),
 	}
 	fmt.Println(envStruct)
 }

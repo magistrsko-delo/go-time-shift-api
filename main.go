@@ -32,6 +32,7 @@ func main()  {
 		UnimplementedTimeshiftServer: 	pb.UnimplementedTimeshiftServer{},
 		MediaChunksClientGrpc:        	grpc_client.InitChunkMetadataClient(),
 		MediaMetadataClientGrpc:      	grpc_client.InitMediaMetadataGrpcClient(),
+		SequenceServiceClientGrpc: 		grpc_client.InitSequenceServiceMetadata(),
 		Env:							Models.GetEnvStruct(),
 	})
 	log.Println("gRPC server running on: " + ":" + Models.GetEnvStruct().Port)
