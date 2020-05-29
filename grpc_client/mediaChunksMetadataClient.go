@@ -1,7 +1,6 @@
 package grpc_client
 
 import (
-	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"go-time-shift-api/Models"
@@ -9,6 +8,10 @@ import (
 	"log"
 
 	pbMediaChunks "go-time-shift-api/proto/media_chunks"
+
+	"golang.org/x/net/context"
+	"github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	ot "github.com/opentracing/opentracing-go"
 )
 
 type MediaChunksClient struct {
@@ -44,10 +47,21 @@ func (mediaChunksClient *MediaChunksClient) GetAvailableResolutions() (*pbMediaC
 }
 
 func InitChunkMetadataClient() *MediaChunksClient  {
+
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithStreamInterceptor(
+		grpc_opentracing.StreamClientInterceptor(
+			grpc_opentracing.WithTracer(ot.GlobalTracer()))))
+	opts = append(opts, grpc.WithUnaryInterceptor(
+		grpc_opentracing.UnaryClientInterceptor(
+			grpc_opentracing.WithTracer(ot.GlobalTracer()))))
+	opts = append(opts, grpc.WithBlock())
+	opts = append(opts, grpc.WithInsecure())
+
 	env := Models.GetEnvStruct()
 	fmt.Println("CONNECTING chunks metadata")
 
-	conn, err := grpc.Dial(env.ChunkMetadataGrpcServer + ":" + env.ChunkMetadataGrpcPort, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.DialContext(context.Background(), env.ChunkMetadataGrpcServer + ":" + env.ChunkMetadataGrpcPort, opts...) // grpc.Dial(env.ChunkMetadataGrpcServer + ":" + env.ChunkMetadataGrpcPort, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
