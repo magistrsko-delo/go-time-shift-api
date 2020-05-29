@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"sync"
 
 	pb "go-time-shift-api/proto/timeshift_service_server"
 )
@@ -21,6 +22,15 @@ func init()  {
 
 
 func main()  {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go gRPCServer()
+
+	wg.Wait()
+}
+
+func gRPCServer()  {
 	lis, err := net.Listen("tcp", ":" + Models.GetEnvStruct().Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
